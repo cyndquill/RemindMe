@@ -20,7 +20,7 @@ class DateTimeTest {
     }
 
     /**
-     * Check underflow doesn't overflow on TimeUnit types
+     * Check underflow remains 0 on TimeUnit types
      */
     fun <T : TimeUnit> checkUnderflow(timeZero: T) {
         assert(timeZero.decrement() == timeZero)
@@ -47,6 +47,8 @@ class DateTimeTest {
         checkIncrementDecrement(Minute(0), Minute(1))
         checkUnderflow(Year(0))
         checkOverflowAndUnderflow(Month(0), Month(1), Month(Month(0).getMax()))
+        // TODO: this test below doesn't work for months without the same number of days
+        //  e.g. checkOverflowAndUnderflow(Day(0, Month(1)), Day(1), Day(Day(0).getMax()))
         checkOverflowAndUnderflow(Day(0), Day(1), Day(Day(0).getMax()))
         checkOverflowAndUnderflow(Hour(0), Hour(1), Hour(Hour(0).getMax()))
         checkOverflowAndUnderflow(Minute(0), Minute(1), Minute(Minute(0).getMax()))
