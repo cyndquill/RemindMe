@@ -2,7 +2,7 @@ package com.cyndquil.remindme
 
 import android.os.Bundle
 import com.cyndquil.remindme.ui.theme.RemindMeTheme
-import com.cyndquil.remindme.ui.TopBar
+import com.cyndquil.remindme.ui.NavigationDrawer
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             RemindMeTheme {
-                TopBar()
+                NavigationPanel()
             }
         }
     }
@@ -25,6 +25,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun RemindMePreview() {
     RemindMeTheme {
-        TopBar()
+        NavigationPanel()
     }
 }
