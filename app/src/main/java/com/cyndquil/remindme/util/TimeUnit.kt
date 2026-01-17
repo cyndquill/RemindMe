@@ -167,10 +167,18 @@ class Year(private val value: Int): TimeUnit(value, null) {
  * @param value The current value of the number
  * @param max The max value the number can hold
  */
-class LoopingNumber(private val value: Int, private val max: Int) {
+class LoopingNumber(private val value: Int, private val max: Int, private val underflow: Int ?= null) {
     private val realMax = max + 1
-    operator fun plus(that: Int): LoopingNumber = LoopingNumber(Math.floorMod(value + that, realMax), max)
-    operator fun minus(that: Int): LoopingNumber = LoopingNumber(Math.floorMod(value - that, realMax), max)
+    private val realUnderflow = if (underflow != null) (underflow + 1) else realMax
+    operator fun plus(that: Int): LoopingNumber = LoopingNumber(Math.floorMod(value + that, realMax), max, underflow)
+    /**
+     * Does not user floorMod since it could underflow to a value higher than max
+     * or, have underflow lower than max and subtract to a value smaller than underflow
+     */
+    operator fun minus(that: Int): LoopingNumber {
+        val uf = if ((value - that) < 0 ) ((value - that) + realUnderflow) else (value - that)
+        return LoopingNumber(uf, max, underflow)
+    }
     fun willOverflow(): Boolean = value == max
     fun willUnderflow(): Boolean = value == 0
     fun toInt(): Int = value
@@ -188,7 +196,7 @@ abstract class LoopingTimeUnit(
     private val max: Int,
     private val unitUp: TimeUnit?,
 ): TimeUnit(value, unitUp) {
-    private val loopingValue = LoopingNumber(value, max)
+    open protected val loopingValue = LoopingNumber(value, max)
     /**
      * Gets the max value a LoopingTimeUnit can be set to
      */
@@ -277,6 +285,15 @@ class Day(
 ) {
     constructor(value: Int, month: Month): this(value, null, month)
     constructor(value: Int): this(value, null, Month(0))
+    /**
+     * Overriden loopingValue since previous months have different number of days
+     */
+    private val prevMonth = month.decrement()
+    override protected val loopingValue = LoopingNumber(
+        value = value,
+        max = getMax(),
+        underflow = prevMonth.getMonthOfYear().getDays(prevMonth.getYear().isLeapYear())-1,
+    )
     /**
      * Getter for the DayOfWeek object (may be null)
      */

@@ -30,27 +30,62 @@ class DateTimeTest {
      * Check underflow and overflow behaves properly on LoopingTimeUnit types
      */
     fun <T: LoopingTimeUnit> checkOverflowAndUnderflow(timeZero: T, timeOne: T, timeMax: T) {
+        println(timeZero.decrement().getValue())
+        println(timeZero.decrement().getUnitUp()?.getValue())
+        println(timeMax.getValue())
+        println(timeMax.getUnitUp()?.getValue())
         assert(timeMax.increment().getValue() == timeZero.getValue())
-        assert(timeMax.increment().getUnitUp() == timeZero.getUnitUp()?.increment())
+        assert(timeMax.increment().getUnitUp() == timeZero.getUnitUp())
         assert((timeMax + timeOne).getValue() == timeZero.getValue())
-        assert((timeMax + timeOne).getUnitUp() == timeZero.getUnitUp()?.increment())
+        assert((timeMax + timeOne).getUnitUp() == timeZero.getUnitUp())
         assert(timeZero.decrement().getValue() == timeMax.getValue())
-        assert(timeZero.decrement().getUnitUp() == timeMax.getUnitUp()?.decrement())
+        assert(timeZero.decrement().getUnitUp() == timeMax.getUnitUp())
     }
 
     @Test
     fun addition_isCorrect() {
-        checkIncrementDecrement(Year(0), Year(1))
-        checkIncrementDecrement(Month(0), Month(1))
-        checkIncrementDecrement(Day(0), Day(1))
-        checkIncrementDecrement(Hour(0), Hour(1))
-        checkIncrementDecrement(Minute(0), Minute(1))
+        // verify that plus === increment() and minus === decrement()
+        checkIncrementDecrement(
+            timeZero = Year(0),
+            timeOne = Year(1)
+        )
+        checkIncrementDecrement(
+            timeZero = Month(0),
+            timeOne = Month(1)
+        )
+        checkIncrementDecrement(
+            timeZero = Day(0),
+            timeOne = Day(1)
+        )
+        checkIncrementDecrement(
+            timeZero = Hour(0),
+            timeOne = Hour(1)
+        )
+        checkIncrementDecrement(
+            timeZero = Minute(0),
+            timeOne = Minute(1)
+        )
+
+        // only for year, since the rest loop
         checkUnderflow(Year(0))
-        checkOverflowAndUnderflow(Month(0), Month(1), Month(Month(0).getMax()))
-        // TODO: this test below doesn't work for months without the same number of days
-        //  e.g. checkOverflowAndUnderflow(Day(0, Month(1)), Day(1), Day(Day(0).getMax()))
-        checkOverflowAndUnderflow(Day(0), Day(1), Day(Day(0).getMax()))
-        checkOverflowAndUnderflow(Hour(0), Hour(1), Hour(Hour(0).getMax()))
-        checkOverflowAndUnderflow(Minute(0), Minute(1), Minute(Minute(0).getMax()))
+
+        // NOTE: timeOne is a SINGLE UNIT! Used for testing plus alongside increment()
+        // Also: timeMax is (super = 0:value = MAX), while timeZero is (super = 1:value = 0)
+        checkOverflowAndUnderflow(
+            timeZero = Month(0, Year(1)),
+            timeOne = Month(1),
+            timeMax = Month(Month(0).getMax()))
+        checkOverflowAndUnderflow(
+            timeZero = Day(0, Month(1)),
+            timeOne = Day(1),
+            timeMax = Day(Day(0).getMax()))
+        checkOverflowAndUnderflow(
+            timeZero = Hour(0, Day(1)),
+            timeOne = Hour(1),
+            timeMax = Hour(Hour(0).getMax()))
+        checkOverflowAndUnderflow(
+            timeZero = Minute(0, Hour(1)),
+            timeOne = Minute(1),
+            timeMax = Minute(Minute(0).getMax()))
     }
 }
